@@ -8,9 +8,7 @@ namespace YamlFileTreeBuilder;
 public class TreeBuilder
 {
     // Base paths to search for templates (order matters - first match wins)
-    private static readonly string[] BasePaths = new[]
-    {
-    };
+    private readonly string[] _basePaths;
 
     private readonly HashSet<string> _visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     private readonly DetailLevel _detailLevel;
@@ -66,8 +64,9 @@ public class TreeBuilder
         ConsoleColor.DarkGreen
     };
 
-    public TreeBuilder(DetailLevel detailLevel = DetailLevel.FilesOnly, StreamWriter? fileWriter = null)
+    public TreeBuilder(string[] basePaths, DetailLevel detailLevel = DetailLevel.FilesOnly, StreamWriter? fileWriter = null)
     {
+        _basePaths = basePaths;
         _detailLevel = detailLevel;
         _fileWriter = fileWriter;
     }
@@ -383,7 +382,7 @@ public class TreeBuilder
 
     private string GetDisplayPath(string fullPath)
     {
-        foreach (var basePath in BasePaths)
+        foreach (var basePath in _basePaths)
         {
             if (fullPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
             {
@@ -433,7 +432,7 @@ public class TreeBuilder
         if (templatePath.StartsWith("/"))
         {
             string relativePath = templatePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-            foreach (var basePath in BasePaths)
+            foreach (var basePath in _basePaths)
             {
                 candidates.Add(Path.Combine(basePath, relativePath));
             }
@@ -447,7 +446,7 @@ public class TreeBuilder
             candidates.Add(Path.Combine(baseDir, templatePath.Replace('/', Path.DirectorySeparatorChar)));
 
             string relativePath = templatePath.Replace('/', Path.DirectorySeparatorChar);
-            foreach (var basePath in BasePaths)
+            foreach (var basePath in _basePaths)
             {
                 candidates.Add(Path.Combine(basePath, relativePath));
             }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace YamlFileTreeBuilder;
 
@@ -86,7 +87,19 @@ class Program
 
         try
         {
-            var treeBuilder = new TreeBuilder(detailLevel, fileWriter);
+            var configuration = new ConfigurationBuilder()
+                .AddUserSecrets<Program>()
+                .Build();
+
+            var basePaths = configuration.GetSection("BasePaths").Get<string[]>();
+            if (basePaths == null || basePaths.Length == 0)
+            {
+                Console.WriteLine("Error: No BasePaths found in user secrets. Run 'dotnet user-secrets set' or manage user secrets in your IDE.");
+                Console.WriteLine("  Expected format: { \"BasePaths\": [\"/path/one\", \"/path/two\"] }");
+                return;
+            }
+
+            var treeBuilder = new TreeBuilder(basePaths, detailLevel, fileWriter);
 
             string header = $"Dependency tree for: {rootPath}";
             string detailInfo = detailLevel switch
