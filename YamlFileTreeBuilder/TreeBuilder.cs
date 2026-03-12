@@ -10,7 +10,6 @@ public class TreeBuilder
     // Base paths to search for templates (order matters - first match wins)
     private static readonly string[] BasePaths = new[]
     {
-        // Add paths to your pipeline folders here
     };
 
     private readonly HashSet<string> _visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
