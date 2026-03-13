@@ -1,0 +1,6 @@
+{
+  "RootFiles": [
+    "/Users/andrewpalmer/Documents/WorkRepos/Pipelines/Office/path/to/pipeline1.yml",
+    "/Users/andrewpalmer/Documents/WorkRepos/Pipelines/Office/path/to/pipeline2.yml"
+  ]
+}
