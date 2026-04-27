@@ -58,6 +58,7 @@ public class BatchAnalyzer
         WriteOutputFile(ranked, rootFiles, Path.GetDirectoryName(batchJsonPath)!);
     }
 
+    // Looks for the BatchRoots.json file starting from the bin / net (executable directory)
     private string? FindBatchRootsJson()
     {
         // Walk up from the executable directory
@@ -73,6 +74,7 @@ public class BatchAnalyzer
         return null;
     }
 
+    // Starts in bin folder and steps up folders one at a time until it finds BatchRoots.json
     private static string? FindFileUpwards(string fileName, string startDir)
     {
         string? dir = startDir;
@@ -121,6 +123,7 @@ public class BatchAnalyzer
         return rootFiles;
     }
 
+    // Main flow for this stuff
     private Dictionary<string, HashSet<string>> CollectAllReferences(List<string> rootFiles)
     {
         var referencedBy = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
@@ -144,6 +147,8 @@ public class BatchAnalyzer
         return referencedBy;
     }
 
+    // Recursively collects all template dependencies for a given file, avoiding cycles and duplicates
+    // I'm not sure if this is what I want.  I need to know the most common ancestors
     private HashSet<string> CollectDependencies(string filePath)
     {
         var dependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
