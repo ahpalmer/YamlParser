@@ -19,6 +19,7 @@ class Program
         DetailLevel detailLevel = DetailLevel.FilesOnly;
         string? outputFile = null;
         bool batchMode = false;
+        bool dimVisited = false;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -47,6 +48,10 @@ class Program
                 case "-b":
                 case "--batch":
                     batchMode = true;
+                    break;
+                case "-d":
+                case "--dim-visited":
+                    dimVisited = true;
                     break;
                 case "-h":
                 case "--help":
@@ -112,7 +117,7 @@ class Program
 
         try
         {
-            var treeBuilder = new TreeBuilder(basePaths, detailLevel, fileWriter);
+            var treeBuilder = new TreeBuilder(basePaths, detailLevel, fileWriter, dimVisited);
 
             string header = $"Dependency tree for: {rootPath}";
             string detailInfo = detailLevel switch
@@ -151,6 +156,7 @@ class Program
         Console.WriteLine("  -o, --output    Write output to a text file (in addition to console)");
         Console.WriteLine("  -b, --batch     Batch mode: process all root files from BatchRoots.json");
         Console.WriteLine("                  and display the most commonly referenced YML files");
+        Console.WriteLine("  -d, --dim-visited  Grey out already-visited files (default: colorful)");
         Console.WriteLine("  -h, --help      Show this help message");
         Console.WriteLine();
         Console.WriteLine("Examples:");

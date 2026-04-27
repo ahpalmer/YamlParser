@@ -13,6 +13,7 @@ public class TreeBuilder
     private readonly HashSet<string> _visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     private readonly DetailLevel _detailLevel;
     private readonly StreamWriter? _fileWriter;
+    private readonly bool _dimVisited;
 
     // Regex patterns
     private static readonly Regex TemplateRegex = new Regex(
@@ -64,11 +65,12 @@ public class TreeBuilder
         ConsoleColor.DarkGreen
     };
 
-    public TreeBuilder(string[] basePaths, DetailLevel detailLevel = DetailLevel.FilesOnly, StreamWriter? fileWriter = null)
+    public TreeBuilder(string[] basePaths, DetailLevel detailLevel = DetailLevel.FilesOnly, StreamWriter? fileWriter = null, bool dimVisited = false)
     {
         _basePaths = basePaths;
         _detailLevel = detailLevel;
         _fileWriter = fileWriter;
+        _dimVisited = dimVisited;
     }
 
     public void WriteLine(string text)
@@ -108,7 +110,7 @@ public class TreeBuilder
 
         if (_visited.Contains(absPath))
         {
-            WriteColored($"{new string(' ', indent * 2)}- {displayPath} (already visited)", indent, dimmed: true);
+            WriteColored($"{new string(' ', indent * 2)}- {displayPath} (already visited)", indent, dimmed: _dimVisited);
             return;
         }
         _visited.Add(absPath);
