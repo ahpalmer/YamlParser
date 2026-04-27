@@ -18,6 +18,7 @@ class Program
         string? rootPath = null;
         DetailLevel detailLevel = DetailLevel.FilesOnly;
         string? outputFile = null;
+        bool batchMode = false;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -43,6 +44,10 @@ class Program
                         return;
                     }
                     break;
+                case "-b":
+                case "--batch":
+                    batchMode = true;
+                    break;
                 case "-h":
                 case "--help":
                     PrintUsage();
@@ -62,6 +67,27 @@ class Program
             }
         }
 
+        // Load configuration (needed for both modes)
+        var configuration = new ConfigurationBuilder()
+            .AddUserSecrets<Program>()
+            .Build();
+
+        var basePaths = configuration.GetSection("BasePaths").Get<string[]>();
+        if (basePaths == null || basePaths.Length == 0)
+        {
+            Console.WriteLine("Error: No BasePaths found in user secrets. Run 'dotnet user-secrets set' or manage user secrets in your IDE.");
+            Console.WriteLine("  Expected format: { \"BasePaths\": [\"/path/one\", \"/path/two\"] }");
+            return;
+        }
+
+        if (batchMode)
+        {
+            var batchAnalyzer = new BatchAnalyzer(basePaths);
+            batchAnalyzer.Run();
+            return;
+        }
+
+        // --- Normal single-file mode ---
         if (string.IsNullOrEmpty(rootPath))
         {
             Console.WriteLine("Error: No YAML file specified");
@@ -76,7 +102,6 @@ class Program
             return;
         }
 
-        // Set up output file if specified
         StreamWriter? fileWriter = null;
         if (!string.IsNullOrEmpty(outputFile))
         {
@@ -87,18 +112,6 @@ class Program
 
         try
         {
-            var configuration = new ConfigurationBuilder()
-                .AddUserSecrets<Program>()
-                .Build();
-
-            var basePaths = configuration.GetSection("BasePaths").Get<string[]>();
-            if (basePaths == null || basePaths.Length == 0)
-            {
-                Console.WriteLine("Error: No BasePaths found in user secrets. Run 'dotnet user-secrets set' or manage user secrets in your IDE.");
-                Console.WriteLine("  Expected format: { \"BasePaths\": [\"/path/one\", \"/path/two\"] }");
-                return;
-            }
-
             var treeBuilder = new TreeBuilder(basePaths, detailLevel, fileWriter);
 
             string header = $"Dependency tree for: {rootPath}";
@@ -130,11 +143,14 @@ class Program
         Console.WriteLine("YamlFileTreeBuilder - Azure DevOps Pipeline Dependency Tree Viewer");
         Console.WriteLine();
         Console.WriteLine("Usage: YamlFileTreeBuilder [options] <yaml-file>");
+        Console.WriteLine("       YamlFileTreeBuilder -b");
         Console.WriteLine();
         Console.WriteLine("Options:");
         Console.WriteLine("  -j, --jobs      Show job names alongside template files");
         Console.WriteLine("  -t, --tasks     Show job names AND task/step names");
         Console.WriteLine("  -o, --output    Write output to a text file (in addition to console)");
+        Console.WriteLine("  -b, --batch     Batch mode: process all root files from BatchRoots.json");
+        Console.WriteLine("                  and display the most commonly referenced YML files");
         Console.WriteLine("  -h, --help      Show this help message");
         Console.WriteLine();
         Console.WriteLine("Examples:");
@@ -142,6 +158,7 @@ class Program
         Console.WriteLine("  YamlFileTreeBuilder -j pipeline.yml");
         Console.WriteLine("  YamlFileTreeBuilder -t pipeline.yml");
         Console.WriteLine("  YamlFileTreeBuilder -t -o output.txt pipeline.yml");
+        Console.WriteLine("  YamlFileTreeBuilder -b");
     }
 }
 
