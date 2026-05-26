@@ -556,3 +556,4 @@ cython_debug/
 # Batch mode config (contains user-specific file paths)
 BatchRoots.json
 BatchTreeOutput.txt
+YamlFileTreeBuilder/YamlFileTreeBuilder.csproj.lscache
